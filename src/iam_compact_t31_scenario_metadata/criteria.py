@@ -153,3 +153,14 @@ change_criteria_params: dict[str, tuple[str, str, int, int]] = {
         ),
     ]
 }
+
+change_criteria: dict[str, ChangeOverTimeCriterion] = {
+    _key: make_pct_change_criterion(
+        reference_year=_reference_year,
+        target_year=_target_year,
+        variable=_variable,
+        name=_name,
+    )
+    for _key, _args in change_criteria_params.items()
+    for _name, _variable, _reference_year, _target_year in (_args,)
+}
