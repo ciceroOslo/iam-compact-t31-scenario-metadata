@@ -141,3 +141,15 @@ def make_cumulative_criterion(
     )
     return criterion
 
+
+change_criteria_params: dict[str, tuple[str, str, int, int]] = {
+    _key: (_name, _variable, _reference_year, _target_year)
+    for _reference_year in (reference_year,) for _target_year in obs_years
+    for _key, _name, _variable in [
+        (
+            f'pct_change_co2_{_reference_year}_{_target_year}',
+            f'Change in CO2 emissions in {_target_year} (% rel to {reference_year})',
+            'Emissions|CO2',
+        ),
+    ]
+}
