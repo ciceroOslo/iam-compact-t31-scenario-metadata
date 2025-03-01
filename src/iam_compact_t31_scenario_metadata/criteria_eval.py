@@ -94,7 +94,7 @@ def criterion_eval_return(
     keep_regions: bool,
     unit: str|bool = False,
     keep_name: bool = False,
-) -> None:
+) -> tp.Generator[None]:
     """Preserve region and/or set units on return from `pea.Criterion.get_values`.
 
     The function returns a context manager that makes `pea.Criterion.get_values`
@@ -132,13 +132,18 @@ def criterion_eval_return(
         standard implementation sets it to None before returning. Optional, by
         default False.
     """
-    from pathways_ensemble_analysis import utils as pea_utils
-    original_format_value_series = pea_utils.format_value_series
+    import pathways_ensemble_analysis.criteria.base as pea_crit_base
+    original_format_value_series = pea_crit_base.format_value_series
 
     def new_format_value_series(series: pd.Series) -> pd.Series:
+        if not isinstance(series, pd.Series):
+            raise TypeError(
+                '`series` must be a pandas.Series.'
+            )
+        orig_name: tp.Final = series.name
         if keep_regions == False:
             series = series.droplevel('region')
-        elif keep_regions != False:
+        elif keep_regions != True:
             raise ValueError(
                 '`keep_regions` must be either True or False.'
             )
@@ -147,19 +152,25 @@ def criterion_eval_return(
         elif isinstance(unit, str):
             series_frame: pd.DataFrame = series.reset_index('unit', drop=False)
             series_frame['unit'] = unit
-            series = series_frame.set_index('unit', append=True)[series.name]
+            series = (y := series_frame.set_index('unit', append=True)) \
+                [y.columns[0]]
             del series_frame
         elif unit != True:
             raise ValueError(
                 '`unit` must be True, False or a string.'
             )
-        if not keep_name:
+        if keep_name != False:
             series.name = None
+        elif keep_name == True:
+            series.name = orig_name
+        else:
+            raise ValueError(
+                '`keep_name` must be either True or False.'
+            )
         return series
 
-    pea_utils.format_value_series = new_format_value_series
+    pea_crit_base.format_value_series = new_format_value_series
     try:
         yield
     finally:
-        pea_utils.format_value_series = original_format_value_series
-
+        pea_crit_base.format_value_series = original_format_value_series

@@ -46,7 +46,7 @@ from pathways_ensemble_analysis.criteria.base import (
 
 reference_year: int = 2020
 obs_years: list[int] = [2030, 2050]
-ccs_end_year: int = 2100
+cumulative_end_years: list[int] = [2100]
 
 
 def make_pct_change_criterion(
@@ -122,6 +122,7 @@ def make_cumulative_criterion(
     end_year: int,
     variable: str,
     name: str,
+    unit: str|None,
     region: str|list[str] = '*',
 ) -> AggregateCriterion:
     """Make a Criterion object that calculates the cumulative sum of something.
@@ -146,6 +147,7 @@ def make_cumulative_criterion(
         years=list(range(start_year, end_year + 1)),
         variable=variable,
         aggregation_function=pd.Series.sum,
+        unit=unit,
         region=region,
     )
     return criterion
@@ -180,7 +182,7 @@ change_criteria: dict[str, ChangeOverTimeCriterion] = {
 }
 
 
-share_criteria_params: dict[str, tuple[str, str, int, int]] = {
+share_criteria_params: dict[str, tuple[str, str, str, int]] = {
     f'share_{_comp_var_key}_{_year}': (
         f'{_comp_var_descr} share in {_tot_var_descr} in {_year} (%)',
         _comp_variable,
@@ -206,13 +208,13 @@ share_criteria_params: dict[str, tuple[str, str, int, int]] = {
     ]
 }
 
-share_criteria: dict[str, ChangeOverTimeCriterion] = {
+share_criteria: dict[str, ShareCriterion] = {
     _key: make_share_criterion(
         year=_year,
         variable_component=_comp_variable,
         variable_total=_tot_variable,
         name=_name,
     )
-    for _key, _args in change_criteria_params.items()
+    for _key, _args in share_criteria_params.items()
     for _name, _comp_variable, _tot_variable, _year in (_args,)
 }
