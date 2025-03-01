@@ -39,6 +39,7 @@ from iam_compact_t31_scenario_metadata.criteria_eval import (
     get_share_criterion_values,
 )
 
+import itertools
 from pathlib import Path
 
 import pandas as pd
@@ -108,3 +109,47 @@ cumulative_values: dict[str, pd.Series] = {
     )
     for _key, _value in cumulative_criteria.items()
 }
+
+# %% [markdown]
+# ## Create a joint DataFrame and add as metadata
+#
+# We now concatenate the individual Series above to a single indexed by the
+# criterion name (in the `variable` index level), and then pivot to a DataFrame
+# with one column for each criterion.
+
+# %% [markdown]
+# ### Concatenate all Series
+#
+# First create a single Series that concatenates all the Series from each of the
+# three dicts above
+# %%
+all_values: pd.Series = pd.concat(
+    itertools.chain(
+        change_values.values(),
+        share_values.values(),
+        cumulative_values.values(),
+    ),
+)
+
+# %% [markdown]
+# Then find the sum of the lengths of the original Series, and check that it
+# equals the length of the concatenated Series, to make sure nothing has been
+# overwritten during the concatenation. Finally, also double check that the
+# index of the concatenated Series contains only unique indexes, with no
+# dupliates.
+# %%
+orig_length: int = sum(len(s) for s in itertools.chain(
+    change_values.values(),
+    share_values.values(),
+    cumulative_values.values(),
+))
+assert orig_length == len(all_values)
+assert all_values.index.is_unique
+
+
+# %% [markdown]
+# Unstack to a DataFrame to get a table with one column for each criterion.
+# Drop the unit index level first, we assume that the unit information is
+# contained in the criteria name so that viewers can look at the colun title
+# afterwards to know what unit is used.
+all_values_df: pd.DataFrame = all_values.droplevel('unit').unstack('variable')
