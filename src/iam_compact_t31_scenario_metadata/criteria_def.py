@@ -161,7 +161,7 @@ def make_cumulative_criterion(
         unit=unit,
         region=region,
     )
-    criterion._cumulative_unit: str|None = cumulative_unit
+    criterion._cumulative_unit = cumulative_unit
     return criterion
 
 
@@ -178,6 +178,41 @@ change_criteria_params: dict[str, tuple[str, str, int, int]] = {
             'co2',
             'CO2 emissions',
             'Emissions|CO2',
+        ),
+        (
+            'pe_coal',
+            'primary energy from coal',
+            'Primary Energy|Coal',
+        ),
+        (
+            'pe_coal_wo_ccs',
+            'primary energy from coal without CCS',
+            'Primary Energy|Coal|w/o CCS',
+        ),
+        (
+            'pe_oil',
+            'primary energy from oil',
+            'Primary Energy|Oil',
+        ),
+         (
+            'pe_gas',
+            'primary energy from gas',
+            'Primary Energy|Gas',
+        ),
+        (
+            'pe_gas_wo_ccs',
+            'primary energy from gas without CCS',
+            'Primary Energy|Gas|w/o CCS',
+        ),
+        (
+            'pe_nuclear',
+            'primary energy from nuclear',
+            'Primary Energy|Nuclear',
+        ),
+        (
+            'pe_nonbio_res',
+            'primary energy from non-biomass renewables',
+            'Primary Energy|Non-Biomass Renewables',
         ),
     ]
 }
@@ -244,9 +279,16 @@ cumulative_criteria_params: dict[str, tuple[str, str, int, int, str|None, str|No
     for _start_year in (reference_year,) for _end_year in cumulative_end_years
     for _var_key, _var_descr, _variable, _unit, _cumulative_unit in [
         (
-            'co2',
-            'CO2 emissions',
-            'Emissions|CO2',
+            'ccs_wo_dac',
+            'CCS except DAC',
+            'Carbon Sequestration|CCS',
+            'Gt CO2 / yr',
+            'Gt CO2',
+        ),
+        (
+            'dac',
+            'Direct air capture',
+            'Carbon Sequestration|Direct Air Capture',
             'Gt CO2 / yr',
             'Gt CO2',
         ),
