@@ -75,14 +75,19 @@ def get_share_criterion_values(
 
 
 def get_cumulative_criterion_values(
-    iamdf: pyam.IamDataFrame, criterion: AggregateCriterion
+    iamdf: pyam.IamDataFrame,
+    criterion: AggregateCriterion,
 ) -> pd.Series:
     """Get values for an IamDataFrame using a Criterion from
     `.criteria_defs.cumulative_criteria`.
     """
+    if hasattr(criterion, '_cumulative_unit'):
+        use_unit: str|bool = getattr(criterion, '_cumulative_unit')
+    else:
+        use_unit: str|bool = True
     with criterion_eval_return(
             keep_regions=True,
-            unit=True,
+            unit=use_unit,
             keep_name=keep_name,
     ):
         values: pd.Series = criterion.get_values(iamdf)

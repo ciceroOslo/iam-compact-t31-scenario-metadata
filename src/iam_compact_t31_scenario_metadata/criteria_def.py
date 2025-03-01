@@ -123,6 +123,7 @@ def make_cumulative_criterion(
     variable: str,
     name: str,
     unit: str|None,
+    cumulative_unit: str|None,
     region: str|list[str] = '*',
 ) -> AggregateCriterion:
     """Make a Criterion object that calculates the cumulative sum of something.
@@ -141,6 +142,16 @@ def make_cumulative_criterion(
     region : str | list[str]
         The region to filter on (passed as `region=region` to
         `pyam.IamdDataFrame.filter`)
+    unit : str|None,
+        The unit to convert to before aggregating
+    cumulative_unit : str|None
+        The cumulative unit to set on the output. This should typically be
+        `unit` with the "per time" part removed. E.g., if `unit` is "Gt CO2 /
+        yr", `cumulative_unit` should be "Gt CO2". *NB!* Note that this
+        parameter only affects what unit is set in the `unit` index level of
+        the output, i.e., it is just used for labelling. It does not trigger any
+        unit conversion. It is the responsibility of the caller to ensure that
+        `unit` and `cumulative_unit` are consistent.
     """
     criterion: AggregateCriterion = AggregateCriterion(
         criterion_name=name,
@@ -150,6 +161,7 @@ def make_cumulative_criterion(
         unit=unit,
         region=region,
     )
+    criterion._cumulative_unit: str|None = cumulative_unit
     return criterion
 
 
@@ -217,4 +229,39 @@ share_criteria: dict[str, ShareCriterion] = {
     )
     for _key, _args in share_criteria_params.items()
     for _name, _comp_variable, _tot_variable, _year in (_args,)
+}
+
+
+cumulative_criteria_params: dict[str, tuple[str, str, int, int, str|None, str|None]] = {
+    f'cumulative_{_var_key}_{_start_year}_{_end_year}': (
+        f'Cumulative {_var_descr} from {_start_year} until {_end_year} ({_cumulative_unit})',
+        _variable,
+        _start_year,
+        _end_year,
+        _unit,
+        _cumulative_unit,
+    )
+    for _start_year in (reference_year,) for _end_year in cumulative_end_years
+    for _var_key, _var_descr, _variable, _unit, _cumulative_unit in [
+        (
+            'co2',
+            'CO2 emissions',
+            'Emissions|CO2',
+            'Gt CO2 / yr',
+            'Gt CO2',
+        ),
+    ]
+}
+
+cumulative_criteria: dict[str, AggregateCriterion] = {
+    _key: make_cumulative_criterion(
+        start_year=_start_year,
+        end_year=_end_year,
+        variable=_variable,
+        name=_name,
+        unit=_unit,
+        cumulative_unit=_cumulative_unit,
+    )
+    for _key, _args in cumulative_criteria_params.items()
+    for _name, _variable, _start_year, _end_year, _unit, _cumulative_unit in (_args,)
 }

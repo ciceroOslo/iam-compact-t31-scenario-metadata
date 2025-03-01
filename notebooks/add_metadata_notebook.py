@@ -28,6 +28,8 @@
 from iam_compact_t31_scenario_metadata.criteria_def import (
     change_criteria,
     change_criteria_params,
+    cumulative_criteria,
+    cumulative_criteria_params,
     share_criteria,
     share_criteria_params,
 )
@@ -94,4 +96,15 @@ change_values: dict[str, pd.Series] = {
 share_values: dict[str, pd.Series] = {
     _key: get_share_criterion_values(iamdf=iamdf, criterion=_value)
     for _key, _value in share_criteria.items()
+}
+
+# %% [markdown]
+# ### Evaluate the cumulative criteria
+# %%
+cumulative_values: dict[str, pd.Series] = {
+    _key: get_cumulative_criterion_values(
+        iamdf=iamdf,
+        criterion=_value
+    )
+    for _key, _value in cumulative_criteria.items()
 }
