@@ -59,7 +59,8 @@ import pyam
 repo_root: Path = Path(__file__).parents[1]
 van_de_ven_folder: Path = repo_root / 'download' / 'VanDeVenEtAl_2023_NCC_outputs'
 
-data_file: Path = van_de_ven_folder / 'global_ite2_allmodels.csv'
+data_file_name: Path = Path('global_ite2_allmodels.csv')
+data_file: Path = van_de_ven_folder / data_file_name
 
 # %% [markdown]
 # The CSV has a bunch of empty columns at the end of each row, and empty rows at
@@ -152,4 +153,26 @@ assert all_values.index.is_unique
 # Drop the unit index level first, we assume that the unit information is
 # contained in the criteria name so that viewers can look at the colun title
 # afterwards to know what unit is used.
+# %%
 all_values_df: pd.DataFrame = all_values.droplevel('unit').unstack('variable')
+
+# %% [markdown]
+# ## Write full data and metadata to Excel
+#
+# Specify the path to save to in the cell below, then run the final cell to save
+# the output.
+# %%
+output_filename: Path = data_file_name \
+    .with_stem(data_file_name.stem + '_with_metadata') \
+        .with_suffix('.xlsx')
+xlsx_output_path: Path = repo_root / 'output' / output_filename
+
+# %% [markdown]
+# Set the DataFrame as metadata on `iamdf` in order to write everything to Excel
+iamdf_with_meta: pyam.IamDataFrame = iamdf.copy()
+iamdf_with_meta.meta = all_values_df
+
+# %% [markdown]
+# Write the output to an Excel file
+# %%
+iamdf_with_meta.to_excel(xlsx_output_path)
