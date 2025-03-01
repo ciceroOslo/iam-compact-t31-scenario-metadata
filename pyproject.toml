@@ -9,6 +9,7 @@ authors = [
 requires-python = ">=3.13"
 dependencies = [
     "iam-validation",
+    "pathways-ensemble-analysis",
 ]
 
 [project.scripts]
@@ -20,6 +21,7 @@ build-backend = "hatchling.build"
 
 [tool.uv.sources]
 iam-validation = { path = "../iam-validation" }
+pathways-ensemble-analysis = { git = "https://gitlab.com/climateanalytics/pathways-ensemble-analysis.git", tag = "v1.1.0" }
 
 [dependency-groups]
 dev = [

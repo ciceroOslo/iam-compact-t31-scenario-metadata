@@ -452,6 +452,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "iam-validation" },
+    { name = "pathways-ensemble-analysis" },
 ]
 
 [package.dev-dependencies]
@@ -464,7 +465,10 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "iam-validation", directory = "../iam-validation" }]
+requires-dist = [
+    { name = "iam-validation", directory = "../iam-validation" },
+    { name = "pathways-ensemble-analysis", git = "https://gitlab.com/climateanalytics/pathways-ensemble-analysis.git?tag=v1.1.0" },
+]
 
 [package.metadata.requires-dev]
 dev = [
@@ -1030,12 +1034,8 @@ wheels = [
 
 [[package]]
 name = "pathways-ensemble-analysis"
-version = "1.0.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/f4/44/26624a0d1a8b204195caf98c4919868527d49be611ea5a6a2bd8bb965a6c/pathways_ensemble_analysis-1.0.0.tar.gz", hash = "sha256:9dff4c181240c0896495509915065baae023bfb271e85c3dd992199da3cf8e0c", size = 1961954 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/d5/2f/7dbc52b4902ea883d34d75fce54254f6d467b0a2782bdefd0ccfd3949dd4/pathways_ensemble_analysis-1.0.0-py2.py3-none-any.whl", hash = "sha256:a985702387b15cb0fe84876f0e56a23d6877d64f380a705d46bb288779d504aa", size = 17515 },
-]
+version = "1.1.0"
+source = { git = "https://gitlab.com/climateanalytics/pathways-ensemble-analysis.git?tag=v1.1.0#22e1165cb1b1f3e2e9a14b783f91165700502adf" }
 
 [[package]]
 name = "pexpect"
