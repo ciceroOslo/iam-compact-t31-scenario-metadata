@@ -20,19 +20,32 @@
 # To run the code, you should create a virtual Python environment and install
 # the repo as a Python package. Please contact Jan Ivar
 # (jan.ivar.korsbakken@cicero.oslo.no) if you are unsure how to do that.
-# 
+#
 
 # %% [markdown]
 # ### Import necessary packages
 # %%
+from iam_compact_t31_scenario_metadata.criteria_def import (
+    change_criteria,
+    change_criteria_params,
+    share_criteria,
+    share_criteria_params,
+)
+from iam_compact_t31_scenario_metadata.criteria_eval import (
+    get_change_criterion_values,
+    get_cumulative_criterion_values,
+    get_share_criterion_values,
+)
+
 from pathlib import Path
 
 import pandas as pd
 import pyam
 
+
 # %% [markdown]
 # ### Load data
-# 
+#
 # Set the path to the data and load it into a `pyam.IamDataFrame`. If the
 # repository root is somewhere other than the parent folder of the folder where
 # this notebook is located, or if you are running in an environment that doesn't
@@ -60,3 +73,25 @@ df = pd.read_csv(data_file, na_values='UNDF') \
 # Then load to an `IamDataFrame`
 # %%
 iamdf: pyam.IamDataFrame = pyam.IamDataFrame(df)
+
+# %% [markdown]
+# ## Evaluate the criteria
+#
+# The criteria have been loaded in the import statements at the top. Evaluate
+# them here.
+
+# %% [markdown]
+# ### Evaluate the change criteria
+# %%
+change_values: dict[str, pd.Series] = {
+    _key: get_change_criterion_values(iamdf=iamdf, criterion=_value)
+    for _key, _value in change_criteria.items()
+}
+
+# %% [markdown]
+# ### Evaluate the share criteria
+# %%
+share_values: dict[str, pd.Series] = {
+    _key: get_share_criterion_values(iamdf=iamdf, criterion=_value)
+    for _key, _value in share_criteria.items()
+}
