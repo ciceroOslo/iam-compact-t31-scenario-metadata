@@ -239,18 +239,25 @@ share_criteria_params: dict[str, tuple[str, str, str, int]] = {
     for _year in obs_years
     for _comp_var_key, _comp_var_descr, _comp_variable, _tot_var_descr, _tot_variable in [
         (
-            'fe_ind',
+            'fe_ind_elshare',
             'Electricity',
             'Final Energy|Industry|Electricity',
             'Final Energy, Industrial sector',
             'Final Energy|Industry',
         ),
         (
-            'fe_bldng',
+            'fe_bldng_elshare',
             'Electricity',
             'Final Energy|Residential and Commercial|Electricity',
             'Final Energy, Buildings sector',
             'Final Energy|Residential and Commercial',
+        ),
+        (
+            'fe_trans_elshare',
+            'Electricity',
+            'Final Energy|Transportation|Electricity',
+            'Final Energy, Transportation sector',
+            'Final Energy|Transportation',
         ),
     ]
 }
