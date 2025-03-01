@@ -180,6 +180,11 @@ change_criteria_params: dict[str, tuple[str, str, int, int]] = {
             'Emissions|CO2',
         ),
         (
+            'co2_ei',
+            'CO2 emissions from energy and industrial processes',
+            'Emissions|CO2|Energy and Industrial Processes',
+        ),
+        (
             'pe_coal',
             'primary energy from coal',
             'Primary Energy|Coal',
