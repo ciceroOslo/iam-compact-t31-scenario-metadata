@@ -69,6 +69,9 @@ def make_pct_change_criterion(
     name : str
         The name of the criterion. Usually a longish name that includes the
         description of the variable and the base and target years.
+    region : str | list[str]
+        The region to filter on (passed as `region=region` to
+        `pyam.IamdDataFrame.filter`)
     """
     criterion: ChangeOverTimeCriterion = ChangeOverTimeCriterion(
         criterion_name=name,
@@ -95,11 +98,14 @@ def make_share_criterion(
         The year to measure the share in.
     component_var : str
         The variable to measure the share of.
-    base_var : str
+    variable_total : str
         The variable to measure the share against.
     name : str
         The name of the criterion. Usually a longish name that includes the
         description of the variable and the year.
+    region : str | list[str]
+        The region to filter on (passed as `region=region` to
+        `pyam.IamdDataFrame.filter`)
     """
     criterion: ShareCriterion = ShareCriterion(
         criterion_name=name,
@@ -131,6 +137,9 @@ def make_cumulative_criterion(
     name : str
         The name of the criterion. Usually a longish name that includes the
         description of the variable and the start and end years.
+    region : str | list[str]
+        The region to filter on (passed as `region=region` to
+        `pyam.IamdDataFrame.filter`)
     """
     criterion: AggregateCriterion = AggregateCriterion(
         criterion_name=name,
@@ -143,12 +152,17 @@ def make_cumulative_criterion(
 
 
 change_criteria_params: dict[str, tuple[str, str, int, int]] = {
-    _key: (_name, _variable, _reference_year, _target_year)
+    f'pct_change_{_var_key}_{_reference_year}_{_target_year}': (
+        f'Change in {_var_descr} in {_target_year} (% change rel to {_reference_year})',
+        _variable,
+        _reference_year,
+        _target_year
+    )
     for _reference_year in (reference_year,) for _target_year in obs_years
-    for _key, _name, _variable in [
+    for _var_key, _var_descr, _variable in [
         (
-            f'pct_change_co2_{_reference_year}_{_target_year}',
-            f'Change in CO2 emissions in {_target_year} (% rel to {reference_year})',
+            'co2',
+            'CO2 emissions',
             'Emissions|CO2',
         ),
     ]
@@ -163,4 +177,42 @@ change_criteria: dict[str, ChangeOverTimeCriterion] = {
     )
     for _key, _args in change_criteria_params.items()
     for _name, _variable, _reference_year, _target_year in (_args,)
+}
+
+
+share_criteria_params: dict[str, tuple[str, str, int, int]] = {
+    f'share_{_comp_var_key}_{_year}': (
+        f'{_comp_var_descr} share in {_tot_var_descr} in {_year} (%)',
+        _comp_variable,
+        _tot_variable,
+        _year
+    )
+    for _year in obs_years
+    for _comp_var_key, _comp_var_descr, _comp_variable, _tot_var_descr, _tot_variable in [
+        (
+            'fe_ind',
+            'Electricity',
+            'Final Energy|Industry|Electricity',
+            'Final Energy, Industrial sector',
+            'Final Energy|Industry',
+        ),
+        (
+            'fe_bldng',
+            'Electricity',
+            'Final Energy|Residential and Commercial|Electricity',
+            'Final Energy, Buildings sector',
+            'Final Energy|Residential and Commercial',
+        ),
+    ]
+}
+
+share_criteria: dict[str, ChangeOverTimeCriterion] = {
+    _key: make_share_criterion(
+        year=_year,
+        variable_component=_comp_variable,
+        variable_total=_tot_variable,
+        name=_name,
+    )
+    for _key, _args in change_criteria_params.items()
+    for _name, _comp_variable, _tot_variable, _year in (_args,)
 }
