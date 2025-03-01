@@ -25,6 +25,7 @@
 # %% [markdown]
 # ### Import necessary packages
 # %%
+import IPython.display
 from iam_compact_t31_scenario_metadata.criteria_def import (
     change_criteria,
     change_criteria_params,
@@ -38,7 +39,11 @@ from iam_compact_t31_scenario_metadata.criteria_eval import (
     get_cumulative_criterion_values,
     get_share_criterion_values,
 )
+from iam_compact_t31_scenario_metadata.process_vars import (
+    add_missing_aggregates,
+)
 
+import IPython
 import itertools
 from pathlib import Path
 
@@ -77,6 +82,35 @@ df = pd.read_csv(data_file, na_values='UNDF') \
 # Then load to an `IamDataFrame`
 # %%
 iamdf: pyam.IamDataFrame = pyam.IamDataFrame(df)
+
+# %% [markdown]
+# ## Preprocess scenario data
+#
+# Preprocessing required to correct for inconsistencies in reporting is done
+# in this section.
+
+# %% [markdown]
+# ## Aggregate non-biomass RES where `Primary Energy|Non-Biomass Renewables` is missing
+#
+# Some models do not report `Primary Energy|Non-Biomass Renewables`, but do
+# report components. The cell below aggregates hydro, solar, wind, geothermal
+# and ocean into an inferred `Primary Energy|Non-Biomass Renewables` variable.
+# It saves the original IamDataFrame, which is later used when writing data
+# back out again, so we do not write back scenario data that didn't come from
+# the model itself.
+# %%
+iamdf_original: pyam.IamDataFrame = iamdf
+iamdf = add_missing_aggregates(
+    iamdf=iamdf,
+    agg_var='Primary Energy|Non-Biomass Renewables',
+    component_vars=[
+        'Primary Energy|Hydro',
+        'Primary Energy|Solar',
+        'Primary Energy|Wind',
+        'Primary Energy|Geothermal',
+        'Primary Energy|Ocean',
+    ],
+)
 
 # %% [markdown]
 # ## Evaluate the criteria
@@ -157,6 +191,20 @@ assert all_values.index.is_unique
 all_values_df: pd.DataFrame = all_values.droplevel('unit').unstack('variable')
 
 # %% [markdown]
+# ### Check for missing data
+#
+# As a check, look at which model/scenario combos are missing the necessary
+# data, or for some other reason produced NaN or null values for each criterion.
+# Display with True values blanked out to make them stand out more.
+# %%
+missing_per_model_scen: pd.DataFrame = all_values_df.isnull() \
+    .groupby(['model', 'scenario']).all()
+pd.options.display.max_columns = 30
+IPython.display.display(
+    missing_per_model_scen.where(lambda x: x, other='')
+)
+
+# %% [markdown]
 # ## Write full data and metadata to Excel
 #
 # Specify the path to save to in the cell below, then run the final cell to save
@@ -168,8 +216,11 @@ output_filename: Path = data_file_name \
 xlsx_output_path: Path = repo_root / 'output' / output_filename
 
 # %% [markdown]
-# Set the DataFrame as metadata on `iamdf` in order to write everything to Excel
-iamdf_with_meta: pyam.IamDataFrame = iamdf.copy()
+# Set the DataFrame as metadata on in order to write everything to Excel. We
+# use the original iamdf (before adding aggregated variables) to write the Excel
+# file, so that the data sheet of the file does not contain aggregates that were
+# not present in the original model outputs.
+iamdf_with_meta: pyam.IamDataFrame = iamdf_original.copy()
 iamdf_with_meta.meta = all_values_df
 
 # %% [markdown]
